@@ -1,0 +1,617 @@
+---
+title: "Inferencia Estadística"
+subtitle: "Tres aproximaciones al mismo problema"
+author:
+  - name: "<span style='font-size:70%;'><strong>Juan David Leongómez</strong></span>
+  <span style='font-size:45%;'>PhD, MSc</span>"
+    degrees:
+      - PhD
+      - MSc
+    orcid: 0000-0002-0092-6298
+    email: jleongomez@unbosque.edu.co
+    url: https://jdleongomez.info/es/
+    affiliations:
+      - name: '<br>[![](img/logo_MetaCiencia.svg){fig-align="right" width="10%"}](https://jdleongomez.github.io/MetaCiencia/)<br>
+               *CODEC: Ciencias Cognitivas y del Comportamiento*<br>
+               Facultad de Psicología<br>
+               Universidad El Bosque'
+date: today
+date-format: "D [de] MMMM [de] YYYY" 
+lang: es
+
+format:
+  revealjs:
+    theme: simple
+    transition: fade
+    slide-number: true
+    incremental: true
+    embed-resources: true
+    width: 1280
+    height: 720
+    margin: 0.08
+    echo: false
+    fig-align: center
+    css: styles.css
+    logo: img/logos.png
+    footer: |
+      <span style="font-size:70%;"><a href="https://jdleongomez.info/es/" target="_blank">
+      <strong>Juan David Leongómez</strong></a></span>
+      <span style="font-size:50%;">PhD, MSc</span>
+
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+library(tidyverse)
+library(patchwork)
+
+n         <- 20
+k         <- 14
+theta_mle <- k / n
+theta_seq <- seq(0.001, 0.999, length.out = 2000)
+
+col_freq  <- "#C0392B"
+col_like  <- "#2471A3"
+col_bayes <- "#1E8449"
+col_prior <- "#AAB7B8"
+
+tema_base <- theme_minimal(base_size = 16) +
+  theme(
+    plot.title       = element_text(face = "bold", size = 18),
+    plot.subtitle    = element_text(size = 13, color = "grey40"),
+    legend.position  = "bottom",
+    legend.text      = element_text(size = 13),
+    axis.title       = element_text(size = 14),
+    axis.text        = element_text(size = 12),
+    panel.grid.minor = element_blank()
+  )
+```
+
+# Probabilidad {background-color="#2C3E50"}
+
+## Una moneda, un parámetro
+
+::: {.incremental}
+- Lanzamos una moneda. Hay dos resultados posibles: **cara** o **sello**
+- Llamamos **θ** (*theta*) a la probabilidad de obtener cara en un lanzamiento
+- Si la moneda es justa: θ = 0.5. Si está trucada hacia cara: θ > 0.5
+- θ es un **parámetro**: un número fijo que describe una propiedad del mundo
+:::
+
+. . .
+
+::: {.callout-note appearance="minimal"}
+En estadística, los **parámetros** son los valores que queremos conocer.  
+Los **datos** son lo que observamos. La **inferencia** es el puente entre ambos.
+:::
+
+## ¿Qué pasa si repetimos el experimento?
+
+::: {.incremental}
+- Supón que θ = 0.5 (moneda perfectamente justa)
+- Lanzas la moneda **20 veces** y cuentas cuántas caras obtienes
+- Si repitieras ese experimento miles de veces, ¿qué resultados serían más frecuentes?
+:::
+
+. . .
+
+```{r fig-binom-prob}
+#| fig-height: 3.5
+tibble(x = 0:n) |>
+  mutate(prob = dbinom(x, n, 0.5)) |>
+  ggplot(aes(x = x, y = prob)) +
+  geom_col(width = 0.7, fill = "#5D6D7E", color = "white", linewidth = 0.3) +
+  geom_vline(xintercept = 10, linetype = "dashed", color = "grey30",
+             linewidth = 0.8, alpha = 0.6) +
+  annotate("text", x = 11, y = 0.165, label = "valor más probable: 10",
+           color = "grey30", size = 4, hjust = 0) +
+  scale_x_continuous(breaks = seq(0, n, 2)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    title    = "Distribución binomial: θ = 0.5, n = 20 lanzamientos",
+    subtitle = "Probabilidad teórica de cada posible número de caras",
+    x = "Número de caras",
+    y = "Probabilidad"
+  ) +
+  tema_base
+```
+
+::: {.fragment}
+Esto es una **distribución de probabilidad**: nos dice qué resultados esperar si *conociéramos* θ.  
+Pero el problema real es el contrario: observamos los datos y queremos **inferir θ**.
+:::
+
+# El problema de la inferencia {background-color="#2C3E50"}
+
+## Del parámetro a los datos... y de vuelta
+
+::: {.incremental}
+- **Probabilidad** (hacia adelante): si sé que θ = 0.5, predigo la distribución de resultados
+- **Inferencia** (hacia atrás): observo los datos y quiero estimar θ
+- Lanzamos la moneda **20 veces** y obtenemos **14 caras**
+- ¿Es esta moneda justa? ¿Cuál es el valor de θ?
+:::
+
+. . .
+
+<br>
+
+| Aproximación | Pregunta central |
+|---|---|
+| **Frecuentista** | ¿Qué tan raros son estos datos si θ = 0.5? |
+| **Verosimilitud** | ¿Qué valor de θ hace más plausibles estos datos? |
+| **Bayesiana** | ¿Qué debería creer sobre θ después de ver los datos? |
+
+# Frecuentista {background-color="#922B21"}
+
+## Lógica frecuentista
+
+::: {.incremental}
+- θ es **fijo y desconocido**, no tiene distribución de probabilidad
+- La probabilidad se entiende como *frecuencia a largo plazo* en experimentos repetidos
+- Proponemos una **hipótesis nula** (H₀): *"la moneda es justa"* → θ = 0.5
+- Si H₀ fuera cierta, la distribución de caras esperada es la que ya vimos
+- Preguntamos: ¿qué tan **raros** serían nuestros 14 caras bajo esa distribución?
+:::
+
+. . .
+
+::: {.callout-note appearance="minimal"}
+**Estimador puntual** $\hat{\theta}$ (*theta-sombrero*): el valor calculado desde los datos que usamos para aproximar θ. El más común es la proporción observada: $\hat{\theta} = k/n = 14/20 = 0.70$
+:::
+
+## El valor *p*
+
+::: {.incremental}
+- El **valor *p*** es la probabilidad de obtener un resultado *tan extremo o más extremo* que el observado, *asumiendo que H₀ es cierta*
+- **No** es la probabilidad de que H₀ sea verdadera
+- Convencionalmente se rechaza H₀ si *p* < 0.05 (umbral arbitrario que puede cambiar)
+- Cuando *p* es muy pequeño (cercano a 0): los datos serían muy raros si H₀ fuese cierta. Entonces hay evidencia *contra* H₀
+:::
+
+## Resultado frecuentista
+
+```{r fig-frecuentista}
+#| fig-height: 4.5
+ic    <- binom.test(k, n, p = 0.5, conf.level = 0.95)
+p_val <- ic$p.value
+
+tibble(x = 0:n) |>
+  mutate(
+    prob = dbinom(x, n, 0.5),
+    zona = x >= k | x <= (n - k)
+  ) |>
+  ggplot(aes(x = x, y = prob, fill = zona)) +
+  geom_col(width = 0.7, color = "white", linewidth = 0.3) +
+  geom_vline(xintercept = k, linetype = "dashed",
+             color = col_freq, linewidth = 1) +
+  annotate("text", x = k + 0.7, y = 0.14,
+           label = paste0("k = ", k, " caras"),
+           color = col_freq, size = 5, hjust = 0, fontface = "bold") +
+  annotate("text", x = 1, y = 0.175,
+           label = sprintf("p = %.3f", p_val),
+           color = col_freq, size = 5.5, hjust = 0, fontface = "bold") +
+  annotate("text", x = 1, y = 0.155,
+           label = sprintf("IC₉₅%%: [%.2f, %.2f]", ic$conf.int[1], ic$conf.int[2]),
+           color = "grey30", size = 4.5, hjust = 0) +
+  scale_fill_manual(
+    values = c("FALSE" = "grey80", "TRUE" = col_freq),
+    labels = c("FALSE" = "región esperada bajo H₀",
+               "TRUE"  = "p (dos colas)")
+  ) +
+  scale_x_continuous(breaks = seq(0, n, 2)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    title    = "Distribución muestral bajo H₀: θ = 0.5",
+    subtitle = "Barras rojas: resultados tan extremos o más que k = 14 (en cualquier dirección)",
+    x = "Número de caras (en 20 lanzamientos)",
+    y = "Probabilidad",
+    fill = NULL
+  ) +
+  tema_base
+```
+
+::: {.fragment}
+p = `r round(p_val, 3)` → si la moneda fuera justa, veríamos datos así solo el `r round(p_val*100, 1)`% de las veces. **Rechazamos H₀**, pero no sabemos *cuánto* más probable es θ = 0.70 que θ = 0.50.
+:::
+
+# Verosimilitud {background-color="#1A5276"}
+
+## ¿Qué es la verosimilitud?
+
+::: {.incremental}
+- En vez de preguntar *"¿qué tan raros son mis datos?"*, preguntamos: **¿qué valor de θ hace que los datos observados sean más probables?**
+- La **verosimilitud** (*likelihood*, $L$) de un valor θ dado los datos es  *la probabilidad de observar esos datos si θ tomara ese valor*
+- Para datos binomiales: $L(\theta) = \binom{n}{k}\,\theta^k\,(1-\theta)^{n-k}$
+:::
+
+. . .
+
+::: {.callout-note appearance="minimal"}
+**$L(\theta)$** no es la probabilidad de que θ sea cierto. Es la probabilidad de los **datos**, evaluada en cada posible valor de θ.  
+*"θ = 0.7 es más verosímil que θ = 0.5"* significa que los datos observados serían más probables si θ fuera 0.7 que si fuera 0.5.
+:::
+
+## La curva de verosimilitud
+
+```{r fig-like-intro}
+#| fig-height: 4.2
+H0 <- 0.50
+H1 <- k / n
+
+like_df <- tibble(theta = theta_seq, like = dbinom(k, n, theta_seq))
+
+# Probability annotation at MLE
+p_at_mle <- dbinom(k, n, H1)
+
+ggplot(like_df, aes(x = theta, y = like)) +
+  geom_line(color = col_like, linewidth = 1.3) +
+  geom_vline(xintercept = H1, linetype = "dashed", color = col_like,
+             linewidth = 0.9, alpha = 0.7) +
+  annotate("point", x = H1, y = p_at_mle, size = 4, color = col_like) +
+  annotate("text", x = H1 + 0.02, y = p_at_mle * 0.72,
+           label = sprintf("MLE: θ̂ = %.2f\nL = %.4f\n(máximo de la curva)", H1, p_at_mle),
+           color = col_like, size = 4, hjust = 0, fontface = "bold") +
+  annotate("text", x = 0.03, y = p_at_mle * 0.85,
+           label = sprintf("Si θ = 0.7:\nP(14 caras en 20) = %.4f", p_at_mle),
+           color = "grey30", size = 3.8, hjust = 0) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(
+    title    = sprintf("L(θ | %d caras en %d lanzamientos)", k, n),
+    subtitle = "Cada punto = P(observar 14 caras en 20 lanzamientos) si θ tomara ese valor",
+    x = "θ (probabilidad de cara)",
+    y = "Verosimilitud  L(θ)"
+  ) +
+  tema_base
+```
+
+## Comparando hipótesis: la razón de verosimilitud
+
+::: {.incremental}
+- La **razón de verosimilitud** (*likelihood ratio*, LR) compara dos hipótesis:
+
+$$LR = \frac{L(\theta_1 \mid \text{datos})}{L(\theta_0 \mid \text{datos})} = \frac{P(\text{datos} \mid \theta_1)}{P(\text{datos} \mid \theta_0)}$$
+
+- LR = 1 → ambas hipótesis igualmente compatibles con los datos
+- LR = 5 → H₁ es 5 veces más compatible con los datos que H₀
+- LR = 0.2 → H₀ es más compatible (5 veces) que H₁
+:::
+
+. . .
+
+::: {.callout-note appearance="minimal"}
+**¿Cuándo es suficiente evidencia?** Umbrales orientativos (Royall, 1997):  
+
+| LR | Interpretación |
+|:---:|---|
+| 1 – 3 | Evidencia débil o anecdótica |
+| 3 – 8 | Evidencia moderada |
+| 8 – 32 | Evidencia fuerte |
+| > 32 | Evidencia muy fuerte |
+:::
+
+## Resultado de verosimilitud
+
+```{r fig-verosimilitud}
+#| fig-height: 4.3
+LR <- dbinom(k, n, H1) / dbinom(k, n, H0)
+
+pts <- tibble(
+  theta = c(H0, H1),
+  like  = c(dbinom(k, n, H0), dbinom(k, n, H1)),
+  label = c(sprintf("H₀: θ = %.1f", H0),
+            sprintf("H₁: θ = %.2f  (MLE)", H1))
+)
+
+ggplot(like_df, aes(x = theta, y = like)) +
+  geom_line(color = col_like, linewidth = 1.2) +
+  geom_segment(aes(x = H0, xend = H1,
+                   y = dbinom(k, n, H0), yend = dbinom(k, n, H0)),
+               linetype = "dashed", color = "grey40", linewidth = 0.8) +
+  geom_segment(aes(x = H1, xend = H1,
+                   y = dbinom(k, n, H0), yend = dbinom(k, n, H1)),
+               linetype = "dashed", color = "grey40", linewidth = 0.8) +
+  annotate("rect",
+           xmin = H1 - 0.006, xmax = H1 + 0.006,
+           ymin = dbinom(k, n, H0), ymax = dbinom(k, n, H1),
+           fill = col_like, alpha = 0.85) +
+  geom_point(data = pts, aes(x = theta, y = like),
+             size = 4, color = "grey20") +
+  geom_text(data = pts, aes(x = theta, y = like, label = label),
+            hjust = c(1.08, -0.06), vjust = 0.4, size = 4.2) +
+  annotate("text",
+           x = H1 + 0.075,
+           y = (dbinom(k, n, H0) + dbinom(k, n, H1)) / 2,
+           label = sprintf("LR = %.1f×", LR),
+           color = col_like, fontface = "bold", size = 5.5) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(
+    title    = "Razón de verosimilitud: H₁ vs. H₀",
+    subtitle = sprintf(
+      "LR = %.1f× → evidencia moderada a favor de θ = %.2f sobre θ = %.1f",
+      LR, H1, H0),
+    x = "θ (probabilidad de cara)",
+    y = "Verosimilitud  L(θ)"
+  ) +
+  tema_base
+```
+
+::: {.fragment}
+LR = `r round(LR, 1)` cae en el rango **moderado** (3–8). Con 100 lanzamientos y la misma proporción (70 caras), LR superaría 10⁶ (la evidencia crece rápidamente con un mayor n).
+:::
+
+# Bayesiana {background-color="#1D6A39"}
+
+## Lógica bayesiana
+
+::: {.incremental}
+- Las aproximaciones anteriores tratan θ como fijo (aunque desconocido)
+- El enfoque bayesiano va un paso más allá: **θ tiene una distribución de probabilidad**
+- Esto permite incorporar **conocimiento previo** (*prior*) antes de ver los datos
+- Y actualizar ese conocimiento con la evidencia observada → el ***posterior***
+:::
+
+. . .
+
+$$\underbrace{P(\theta \mid \text{datos})}_{\text{posterior}} \;\propto\; \underbrace{P(\text{datos} \mid \theta)}_{\text{verosimilitud}} \;\times\; \underbrace{P(\theta)}_{\text{prior}}$$
+
+. . .
+
+::: {.callout-note appearance="minimal"}
+**∝** significa *"proporcional a"*: el posterior tiene la misma forma que el producto verosimilitud × prior, solo ajustado para que todas las probabilidades sobre θ sumen 1.
+:::
+
+## Los tres ingredientes
+
+::: {.incremental}
+- **Prior** $P(\theta)$: lo que creemos sobre θ *antes* de ver los datos.  
+  Puede ser vago (*"no sé nada"*) o informativo (*"la moneda debe ser justa"*)
+
+- **Verosimilitud** $P(\text{datos} \mid \theta)$: la misma función que ya vimos:  
+  qué tan probable es observar los datos para cada valor de θ
+
+- **Posterior** $P(\theta \mid \text{datos})$: nuestra creencia *actualizada* sobre θ  
+  después de combinar prior y datos
+:::
+
+. . .
+
+::: {.callout-note appearance="minimal"}
+Para datos binomiales con prior **Beta(a, b)**, el posterior es exactamente **Beta(a + k, b + n − k)**.  
+Donde **k** = caras observadas, **n** = lanzamientos totales, y **a** y **b** son los parámetros del prior, que pueden interpretarse como "caras previas imaginarias" y "sellos previos imaginarios": cuanto más grandes, más fuerte (e informativo) es el prior. Los datos simplemente *suman* observaciones al prior (es una una actualización analítica y exacta de nuestra creencia).
+:::
+
+## Paso 1: El prior
+
+```{r fig-bayes-1}
+#| fig-height: 4.0
+a <- 3; b <- 3
+a_post <- a + k
+b_post <- b + (n - k)
+media_post <- a_post / (a_post + b_post)
+ic_low     <- qbeta(0.025, a_post, b_post)
+ic_high    <- qbeta(0.975, a_post, b_post)
+
+like_raw   <- dbinom(k, n, theta_seq)
+post_vals  <- dbeta(theta_seq, a_post, b_post)
+prior_vals <- dbeta(theta_seq, a, b)
+scale_f    <- max(post_vals) / max(like_raw)
+ylim_max   <- max(post_vals) * 1.1
+
+tibble(theta = theta_seq, dens = prior_vals) |>
+  ggplot(aes(x = theta, y = dens)) +
+  geom_line(color = col_prior, linewidth = 1.4) +
+  geom_ribbon(aes(ymin = 0, ymax = dens), fill = col_prior, alpha = 0.25) +
+  annotate("text", x = 0.5, y = max(prior_vals) * 0.85,
+           label = sprintf("Prior Beta(%d,%d)\nmedia = %.1f", a, b, a/(a+b)),
+           color = "grey40", size = 4.5, hjust = 0.5) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  coord_cartesian(ylim = c(0, ylim_max)) +
+  labs(
+    title    = "Prior: creencia inicial sobre θ",
+    subtitle = sprintf("Beta(%d,%d): θ podría ser cualquier valor, pero probablemente cerca de 0.5", a, b),
+    x = "θ (probabilidad de cara)", y = "Densidad"
+  ) +
+  tema_base
+```
+
+## Paso 2: Los datos (verosimilitud)
+
+```{r fig-bayes-2}
+#| fig-height: 4.0
+tibble(
+  theta = theta_seq,
+  Prior = prior_vals,
+  Datos = like_raw * scale_f
+) |>
+  pivot_longer(-theta, names_to = "dist", values_to = "dens") |>
+  mutate(dist = factor(dist, c("Prior", "Datos"))) |>
+  ggplot(aes(x = theta, y = dens, color = dist, linetype = dist)) +
+  geom_line(linewidth = 1.2) +
+  scale_color_manual(
+    values = c("Prior" = col_prior, "Datos" = "grey30"),
+    labels = c("Prior" = sprintf("Prior Beta(%d,%d)", a, b),
+               "Datos" = sprintf("Datos: %d caras en %d lanzamientos (escalado)", k, n)),
+    name = NULL
+  ) +
+  scale_linetype_manual(
+    values = c("Prior" = "solid", "Datos" = "dotted"),
+    labels = c("Prior" = sprintf("Prior Beta(%d,%d)", a, b),
+               "Datos" = sprintf("Datos: %d caras en %d lanzamientos (escalado)", k, n)),
+    name = NULL
+  ) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  coord_cartesian(ylim = c(0, ylim_max)) +
+  labs(
+    title    = "Superponemos la verosimilitud",
+    subtitle = "La curva de datos concentra la evidencia alrededor de θ̂ = 0.70",
+    x = "θ (probabilidad de cara)", y = "Densidad"
+  ) +
+  tema_base
+```
+
+## Paso 3: El posterior
+
+```{r fig-bayes-3}
+#| fig-height: 3.8
+tibble(
+  theta = theta_seq,
+  Prior = prior_vals,
+  Datos = like_raw * scale_f,
+  Posterior = post_vals
+) |>
+  pivot_longer(-theta, names_to = "dist", values_to = "dens") |>
+  mutate(dist = factor(dist, c("Prior", "Datos", "Posterior"))) |>
+  ggplot(aes(x = theta, y = dens, color = dist, linetype = dist)) +
+  geom_ribbon(
+    data  = ~ filter(.x, dist == "Posterior"),
+    aes(ymin = 0, ymax = dens),
+    fill = col_bayes, alpha = 0.12, color = NA
+  ) +
+  geom_line(linewidth = 1.15) +
+  geom_vline(xintercept = media_post, linetype = "dashed",
+             color = col_bayes, linewidth = 0.8, alpha = 0.8) +
+  annotate("text", x = media_post + 0.02, y = max(post_vals) * 0.55,
+           label = sprintf("media\nposterior\n= %.2f", media_post),
+           color = col_bayes, size = 3.8, hjust = 0) +
+  annotate("text", x = 0.03, y = max(post_vals) * 0.96,
+           label = sprintf("IC₉₅%%: [%.2f, %.2f]", ic_low, ic_high),
+           color = col_bayes, size = 3.8, hjust = 0) +
+  scale_color_manual(
+    values = c("Prior" = col_prior, "Datos" = "grey30", "Posterior" = col_bayes),
+    name = NULL
+  ) +
+  scale_linetype_manual(
+    values = c("Prior" = "solid", "Datos" = "dotted", "Posterior" = "solid"),
+    name = NULL
+  ) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  coord_cartesian(ylim = c(0, ylim_max)) +
+  labs(
+    title    = "Posterior: creencia actualizada sobre θ",
+    subtitle = sprintf("Beta(%d,%d) + datos → Posterior Beta(%d,%d) | IC₉₅%% es una probabilidad directa sobre θ",
+                       a, b, a_post, b_post),
+    x = "θ (probabilidad de cara)", y = "Densidad"
+  ) +
+  tema_base
+```
+
+## ¿Cuánto importa el prior?
+
+::: {.incremental}
+- El prior refleja cuánto sabemos *antes de los datos* y cuánto cuesta cambiar esa creencia
+- **Prior débil** (*vago*): pocas suposiciones → los datos dominan rápidamente  
+  *"No tengo idea de si esta moneda es justa o no"*
+- **Prior moderado**: creencia razonable pero dispuesta a cambiar  
+  *"Probablemente es una moneda normal, pero podría estar trucada"*
+- **Prior fuerte**: convicción firme que requiere mucha evidencia para moverse  
+  *"Esta moneda salió de fábrica calibrada: casi seguro es justa"*
+:::
+
+. . .
+
+::: {.callout-tip appearance="minimal"}
+**Analogía**: imagina cuánta evidencia necesitarías para cambiar estas creencias:  
+🪨 *"Los objetos caen hacia abajo"*: prior fuertísimo; necesitarías miles de experimentos  
+☕ *"Este café nuevo me va a gustar"*: prior débil; basta con un sorbo  
+Con suficientes datos, priors razonables **siempre convergen al mismo posterior**.
+:::
+
+## El prior importa más cuando hay pocos datos
+
+```{r fig-priors-comparados}
+#| fig-height: 4.0
+priors_comp <- tribble(
+  ~nombre,                    ~a,   ~b,
+  "Vago  Beta(1,1)",           1,    1,
+  "Moderado  Beta(3,3)",       3,    3,
+  "Fuerte  Beta(50,50)",      50,   50
+) |>
+  mutate(a_post = a + k, b_post = b + (n - k))
+
+priors_comp |>
+  select(nombre, a_post, b_post) |>
+  crossing(theta = theta_seq) |>
+  mutate(
+    post   = dbeta(theta, a_post, b_post),
+    nombre = factor(nombre, priors_comp$nombre)
+  ) |>
+  ggplot(aes(x = theta, y = post, color = nombre, linetype = nombre)) +
+  geom_line(linewidth = 1.1) +
+  geom_vline(xintercept = theta_mle, linetype = "dashed",
+             color = "grey50", linewidth = 0.7, alpha = 0.7) +
+  annotate("text", x = theta_mle + 0.015, y = 1.0,
+           label = sprintf("MLE = %.2f", theta_mle),
+           color = "grey40", size = 3.8, hjust = 0) +
+  scale_color_manual(
+    values = c("grey60", col_bayes, "#8E44AD"),
+    name = "Prior"
+  ) +
+  scale_linetype_manual(
+    values = c("dashed", "solid", "dotdash"),
+    name = "Prior"
+  ) +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(
+    title    = "Posteriors según distintos priors  (n = 20 lanzamientos)",
+    subtitle = "El prior fuerte Beta(50,50) resiste la evidencia; con n = 200 los tres convergerían",
+    x = "θ (probabilidad de cara)", y = "Densidad posterior"
+  ) +
+  tema_base
+```
+
+# Comparación {background-color="#2C3E50"}
+
+## Las tres aproximaciones lado a lado
+
+<br>
+
+| | Frecuentista | Verosimilitud | Bayesiana |
+|---|:---:|:---:|:---:|
+| ¿Qué es θ? | Fijo, desconocido | Fijo, desconocido | Variable aleatoria |
+| ¿Necesita H₀? | **Sí** | No | No |
+| ¿Necesita prior? | No | No | **Sí** |
+| Resultado | *p* + IC | LR + MLE | Distribución posterior |
+| ¿Puede decir P(θ > 0.5)? | No | No | **Sí** |
+
+. . .
+
+<br>
+
+::: {.callout-tip appearance="minimal"}
+No hay una respuesta "correcta"; cada enfoque responde **una pregunta diferente**.  
+La elección depende del contexto, los objetivos y la tradición disciplinar.
+:::
+
+## Para profundizar
+
+<br>
+
+::: {.nonincremental}
+- **Frecuentista**: Neyman & Pearson (1933); cualquier manual clásico de estadística
+- **Verosimilitud**: Royall, R. (1997). *Statistical Evidence: A Likelihood Paradigm*. Chapman & Hall
+- **Bayesiana**: McElreath, R. (2020). *Statistical Rethinking* (2ª ed.). CRC Press
+- **Comparativa y accesible**: Lakens, D. (2021). [*Improving Your Statistical Inferences*](https://lakens.github.io/statistical_inferences/) [libre y en línea]
+:::
+
+<br>
+
+::: {.center}
+[{{< fa brands github >}} *Código reproducible disponible en el repositorio*](https://github.com/JDLeongomez/Inferencia_estadistica)
+:::
+
+# ¡Gracias! {auto-animate="true"}
+
+::::: columns
+::: {.column width="50%"}
+[![](img/logo_MetaCiencia.svg){fig-align="right" width="50%"}](https://jdleongomez.github.io/MetaCiencia/)
+:::
+
+::: {.column width="50%"}
+**Juan David Leongómez** [PhD, MSc]{style="font-size: 50%;"}<br> [[jleongomez\@unbosque.edu.co](mailto:jleongomez@unbosque.edu.co)]{style="font-size: 70%;"}<br>
+[![](img/jdl_qr.png){width="55%"}](https://jdleongomez.info/es/)
+:::
+:::::
