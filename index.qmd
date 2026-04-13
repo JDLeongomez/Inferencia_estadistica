@@ -591,10 +591,19 @@ La elección depende del contexto, los objetivos y la tradición disciplinar.
 <br>
 
 ::: {.nonincremental}
-- **Frecuentista**: Neyman & Pearson (1933); cualquier manual clásico de estadística
-- **Verosimilitud**: Royall, R. (1997). *Statistical Evidence: A Likelihood Paradigm*. Chapman & Hall
-- **Bayesiana**: McElreath, R. (2020). *Statistical Rethinking* (2ª ed.). CRC Press
-- **Comparativa y accesible**: Lakens, D. (2021). [*Improving Your Statistical Inferences*](https://lakens.github.io/statistical_inferences/) [libre y en línea]
+**Recomendada** (Compara las diferentes formas de inferencia de manera muy accesible)
+
+- Lakens, D. (2021). [*Improving Your Statistical Inferences*](https://lakens.github.io/statistical_inferences/) [<span style="color:#C0392B;">libre y en línea</span>]
+
+**Especializadas**
+
+- **Frecuentista**: Cualquier manual clásico de estadística; por ejemplo: 
+  - Gillard, J. (2020). [*A first course in statistical inference*](https://doi.org/10.1007/978-3-030-39561-2). Springer
+
+- **Verosimilitud**: 
+  - Royall, R. (1997). [*Statistical Evidence: A Likelihood Paradigm*](https://www.taylorfrancis.com/books/mono/10.1201/9780203738665/statistical-evidence-tibshirani-richard-royall). Chapman & Hall
+- **Bayesiana**: 
+  - McElreath, R. (2020). [*Statistical Rethinking*](https://www.taylorfrancis.com/books/mono/10.1201/9780429029608/statistical-rethinking-richard-mcelreath) (2ª ed.). CRC Press
 :::
 
 <br>
