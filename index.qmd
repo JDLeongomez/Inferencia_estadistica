@@ -603,7 +603,7 @@ La elección depende del contexto, los objetivos y la tradición disciplinar.
 - **Verosimilitud**: 
   - Royall, R. (1997). [*Statistical Evidence: A Likelihood Paradigm*](https://www.taylorfrancis.com/books/mono/10.1201/9780203738665/statistical-evidence-tibshirani-richard-royall). Chapman & Hall
 - **Bayesiana**: 
-  - McElreath, R. (2020). [*Statistical Rethinking*](https://www.taylorfrancis.com/books/mono/10.1201/9780429029608/statistical-rethinking-richard-mcelreath) (2ª ed.). CRC Press
+  - McElreath, R. (2020). [*Statistical Rethinking: A Bayesian Course with Examples in R and STAN*](https://www.taylorfrancis.com/books/mono/10.1201/9780429029608/statistical-rethinking-richard-mcelreath) (2ª ed.). CRC Press
 :::
 
 <br>
