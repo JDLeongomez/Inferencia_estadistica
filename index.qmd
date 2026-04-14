@@ -1,8 +1,8 @@
 ---
 title: "Inferencia Estadística"
-subtitle: "Tres aproximaciones al mismo problema"
+subtitle: "Tres aproximaciones"
 author:
-  - name: "<span style='font-size:70%;'><strong>Juan David Leongómez</strong></span>
+  - name: "<strong>Juan David Leongómez</strong>
   <span style='font-size:45%;'>PhD, MSc</span>"
     degrees:
       - PhD
@@ -11,10 +11,11 @@ author:
     email: jleongomez@unbosque.edu.co
     url: https://jdleongomez.info/es/
     affiliations:
-      - name: '<br>[![](img/logo_MetaCiencia.svg){fig-align="right" width="10%"}](https://jdleongomez.github.io/MetaCiencia/)<br>
-               *CODEC: Ciencias Cognitivas y del Comportamiento*<br>
+      - name: "<br>
+               [*CODEC: Ciencias Cognitivas y del Comportamiento*](https://unbosque.portalinvestigacion.com/grupos/302)<br>
+               [*MetaCiencia: Semillero de Investigación*](https://jdleongomez.github.io/MetaCiencia/)<br>
                Facultad de Psicología<br>
-               Universidad El Bosque'
+               Universidad El Bosque"
 date: today
 date-format: "D [de] MMMM [de] YYYY" 
 lang: es

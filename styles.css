@@ -20,12 +20,39 @@
   margin-bottom: 0.6em;
 }
 
-/* ── Slides de sección (fondo oscuro) ──────────────────── */
-.reveal .slide-background-content {
+/* ── Slides de sección (fondo oscuro) ──────────────────/* ── Links en diapositivas ──────────────────────────────── */
+.reveal a {
+  color: #2471A3;
+  text-decoration: none;
+}
+
+.reveal a:hover {
+  color: #1A5276;
+  text-decoration: underline;
+}── */
+.reveal .slide-background-content {/* ── Links en diapositivas ──────────────────────────────── */
+.reveal a {
+  color: #2471A3;
+  text-decoration: none;
+}
+
+.reveal a:hover {
+  color: #1A5276;
+  text-decoration: underline;
+}
   background-size: cover;
 }
 
-/* h1 en slides con background-color */
+/* h1 en slides con background-color *//* ── Links en diapositivas ──────────────────────────────── */
+.reveal a {
+  color: #2471A3;
+  text-decoration: none;
+}
+
+.reveal a:hover {
+  color: #1A5276;
+  text-decoration: underline;
+}
 .reveal section[data-background-color] h1 {
   font-size: 2em;
   color: #ffffff;
@@ -92,4 +119,15 @@
 /* ── Centro helper ──────────────────────────────────────── */
 .center {
   text-align: center;
+}
+
+/* ── Links en diapositivas ──────────────────────────────── */
+.reveal a {
+  color: #2471A3 !important;
+  text-decoration: none;
+}
+
+.reveal a:hover {
+  color: #1A5276 !important;
+  text-decoration: underline;
 }
