@@ -5,19 +5,19 @@
 
 Presentación introductoria sobre los tres enfoques principales de inferencia estadística — **frecuentista**, **verosimilitud** y **bayesiano** — ilustrados con un ejemplo sencillo: lanzar una moneda 20 veces y observar 14 caras.
 
-## 🌐 Ver la presentación
+## Ver la presentación
 
-👉 **[jdleongomez.github.io/Inferencia_estadistica](https://jdleongomez.github.io/Inferencia_estadistica)**
+**[jdleongomez.github.io/Inferencia_estadistica](https://jdleongomez.github.io/Inferencia_estadistica)**
 
 ## Contenido
 
 La presentación cubre:
 
 - Probabilidad y parámetros: qué es θ y cómo se distribuyen los resultados
-- El problema de la inferencia: de los datos al parámetro
-- **Frecuentista**: hipótesis nula, valor p e intervalos de confianza
+- El problema de la inferencia: cómo pasar de los datos al parámetro
+- **Frecuentista**: hipótesis nula, valor *p* e intervalos de confianza
 - **Verosimilitud**: la función L(θ), el MLE y la razón de verosimilitud
-- **Bayesiana**: prior, verosimilitud y posterior — actualización paso a paso
+- **Bayesiana**: prior, verosimilitud y posterior
 - Comparación de los tres enfoques
 
 ## Reproducibilidad
@@ -48,9 +48,8 @@ quarto render index.qmd
 
 ## Autor
 
-**Juan David Leongómez**, PhD, MSc  
+[**Juan David Leongómez**](https://jdleongomez.info/es), PhD, MSc  
 Facultad de Psicología · Universidad El Bosque · Bogotá, Colombia  
-🌐 [jdleongomez.info](https://jdleongomez.info/es) · 
 [![ORCID](https://img.shields.io/badge/ORCID-0000--0002--0092--6298-brightgreen?logo=orcid)](https://orcid.org/0000-0002-0092-6298)
 
 ## Licencia
