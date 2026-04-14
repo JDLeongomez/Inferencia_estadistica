@@ -3,7 +3,7 @@
 [![Quarto](https://img.shields.io/badge/Quarto-RevealJS-blue?logo=quarto)](https://quarto.org)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-Presentación introductoria sobre los tres enfoques principales de inferencia estadística — **frecuentista**, **verosimilitud** y **bayesiano** — ilustrados con un ejemplo sencillo: lanzar una moneda 20 veces y observar 14 caras.
+Presentación introductoria sobre los tres enfoques principales de inferencia estadística: **frecuentista**, **verosimilitud** y **bayesiano**, ilustrados con un ejemplo sencillo: lanzar una moneda 20 veces y observar 14 caras.
 
 ## Ver la presentación
 
